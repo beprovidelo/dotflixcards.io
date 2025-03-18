@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linha de Cards Netflix</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+<style>
+   body {
+     background-color: #141414;
+     color: white;
+     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+     padding-top: 50px;
+   }
+   .logo-area {
+     position: fixed;
+     top: 20px;
+     left: 20px;
+     z-index: 100;
+   }
+   .netflix-row {
+     position: relative;
+     margin: 0 auto;
+     width: 95%;
+     max-width: 1600px;
+     padding-top: 20px;
+   }
+   .row-title {
+     font-size: 24px;
+     font-weight: bold;
+     margin-bottom: 15px;
+     padding-left: 5px;
+   }
+   .card-slider {
+     display: flex;
+     gap: 8px;
+     overflow-x: auto;
+     scroll-behavior: smooth;
+     padding: 5px 0;
+     scrollbar-width: none; /* Firefox */
+   }
+   .card-slider::-webkit-scrollbar {
+     display: none; /* Chrome, Safari, Opera */
+   }
+   .card {
+     flex: 0 0 auto;
+     width: 185px;
+     height: 278px;
+     position: relative;
+     transition: transform 0.3s ease, box-shadow 0.3s ease;
+     border-radius: 4px;
+     overflow: hidden;
+   }
+   .card:hover {
+     transform: scale(1.05);
+     z-index: 1;
+     box-shadow: 0 0 15px rgba(0,0,0,0.6);
+   }
+   .card img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     border-radius: 4px;
+   }
+   .card-title {
+     position: absolute;
+     bottom: 0;
+     left: 0;
+     right: 0;
+     background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+     padding: 10px;
+     text-align: center;
+     font-size: 14px;
+     opacity: 0;
+     transition: opacity 0.3s ease;
+   }
+   .card:hover .card-title {
+     opacity: 1;
+   }
+   .rating-badge {
+     position: absolute;
+     top: 5px;
+     left: 5px;
+     background-color: rgba(0,0,0,0.7);
+     color: white;
+     font-size: 12px;
+     padding: 2px 6px;
+     border-radius: 2px;
+   }
+   .navigation-buttons {
+     position: absolute;
+     top: 50%;
+     width: 100%;
+     display: flex;
+     justify-content: space-between;
+     pointer-events: none;
+   }
+   .nav-btn {
+     background-color: rgba(0,0,0,0.5);
+     color: white;
+     width: 40px;
+     height: 100px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     cursor: pointer;
+     opacity: 0;
+     transition: opacity 0.3s ease;
+     transform: translateY(-50%);
+     pointer-events: auto;
+     border-radius: 4px;
+     font-size: 20px;
+   }
+   .netflix-row:hover .nav-btn {
+     opacity: 1;
+   }
+</style>
+</head>
+<body>
+<!-- Netflix Logo -->
+<div class="logo-area">
+  <img src="/api/placeholder/100/30" alt="Netflix Logo" class="h-8">
+</div>
+<!-- Netflix Originals Row -->
+<div class="netflix-row mt-12">
+  <h2 class="row-title">NETFLIX ORIGINALS</h2>
+  <div class="card-slider" id="originalSlider">
+    <!-- Card 1 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="Frozen II">
+      <div class="rating-badge">PG</div>
+      <div class="card-title">Frozen II</div>
+    </div>
+    <!-- Card 2 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="Knives Out">
+      <div class="rating-badge">PG-13</div>
+      <div class="card-title">Knives Out</div>
+    </div>
+    <!-- Card 3 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="Ford v Ferrari">
+      <div class="rating-badge">PG-13</div>
+      <div class="card-title">Ford v Ferrari</div>
+    </div>
+    <!-- Card 4 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="Charlie's Angels">
+      <div class="rating-badge">PG-13</div>
+      <div class="card-title">Charlie's Angels</div>
+    </div>
+    <!-- Card 5 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="A Beautiful Day in the Neighborhood">
+      <div class="rating-badge">PG</div>
+      <div class="card-title">A Beautiful Day in the Neighborhood</div>
+    </div>
+    <!-- Card 6 -->
+    <div class="card">
+      <img src="/api/placeholder/185/278" alt="The Irishman">
+      <div class="rating-badge">R</div>
+      <div class="card-title">The Irishman</div>
+    </div>
+  </div>
+  <!-- Navigation Buttons -->
+  <div class="navigation-buttons">
+    <button class="nav-btn nav-prev" id="prevBtn">❮</button>
+    <button class="nav-btn nav-next" id="nextBtn">❯</button>
+  </div>
+</div>
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+     // Função para configurar o slider de cards
+     function setupSlider(sliderId, prevBtnId, nextBtnId) {
+       const slider = document.getElementById(sliderId);
+       const prevBtn = document.getElementById(prevBtnId);
+       const nextBtn = document.getElementById(nextBtnId);
+       if (!slider || !prevBtn || !nextBtn) return;
+       const cardWidth = 185 + 8; // Largura do card + gap
+       const visibleCards = Math.floor(slider.offsetWidth / cardWidth);
+       const scrollAmount = cardWidth * visibleCards;
+       // Botão de próximo
+       nextBtn.addEventListener('click', function() {
+         slider.scrollBy({
+           left: scrollAmount,
+           behavior: 'smooth'
+         });
+         // Voltar ao início quando chegar ao final
+         if (slider.scrollLeft + slider.offsetWidth >= slider.scrollWidth - 10) {
+           setTimeout(() => {
+             slider.scrollTo({
+               left: 0,
+               behavior: 'smooth'
+             });
+           }, 500);
+         }
+       });
+       // Botão de anterior
+       prevBtn.addEventListener('click', function() {
+         slider.scrollBy({
+           left: -scrollAmount,
+           behavior: 'smooth'
+         });
+         // Ir para o final quando estiver no início
+         if (slider.scrollLeft <= 10) {
+           setTimeout(() => {
+             slider.scrollTo({
+               left: slider.scrollWidth,
+               behavior: 'smooth'
+             });
+           }, 500);
+         }
+       });
+     }
+     // Configurar o slider
+     setupSlider('originalSlider', 'prevBtn', 'nextBtn');
+   });
+</script>
+</body>
+</html>
